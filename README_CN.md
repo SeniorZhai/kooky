@@ -34,6 +34,23 @@
 
 **基于 libghostty。** 使用和 ghostty 同源的 GPU 终端渲染引擎。
 
+## 快捷键
+
+| 快捷键 | 功能 |
+| --- | --- |
+| `⌘T` | 新建 Tab |
+| `⌘N` | 新建 Workspace |
+| `⌘W` | 关闭 Tab |
+| `⌘⇧T` | 恢复关闭的 Tab |
+| `⌘⇧W` | 关闭当前 Workspace |
+| `⌘⌃S` | 切换侧边栏状态（三档） |
+| `⌘B` | 显示/隐藏侧边栏 |
+| `⌘1`–`9` | 切换 Tab |
+| `⌘⌥1`–`9` | 切换 Workspace |
+| `⌘=` / `⌘-` | 增大 / 减小字号 |
+| `⌘K` | 清屏 |
+| `⌘F` | 在面板中查找 |
+
 ## 安装
 
 从 [Releases](https://github.com/iAmCorey/kooky/releases) 下载最新的 `.dmg`，打开后把 `Kooky.app` 拖进 `Applications` 文件夹。
