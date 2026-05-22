@@ -312,6 +312,8 @@ enum KookyShellIntegration {
         writeWrapper(name: "agy", script: antigravityWrapperScript)
         writeWrapper(name: "kimi", script: bracketWrapperScript(slug: "kimi"))
         writeWrapper(name: "pi", script: bracketWrapperScript(slug: "pi"))
+        writeWrapper(name: "lazygit", script: bracketWrapperScript(slug: "lazygit"))
+        writeWrapper(name: "lg", script: bracketWrapperScript(slug: "lg"))
         refreshSshRemoteAgentDetection(enabled: sshRemoteAgentDetection)
 
         let hookCmd = kookyHookBinaryPath

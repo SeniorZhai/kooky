@@ -268,6 +268,25 @@ final class ShellIntegrationTests: XCTestCase {
     }
 
     @MainActor
+    func testHookServerParsesLazygitAndLgPayloads() throws {
+        let id = UUID()
+        for slug in ["lazygit", "lg"] {
+            let data = try JSONSerialization.data(withJSONObject: [
+                "agent": slug,
+                "event": "running",
+                "surface": id.uuidString,
+            ])
+
+            guard case .agent(let agent, let event, let sessionId) = HookServer.parseMessage(data) else {
+                return XCTFail("expected agent hook message for \(slug)")
+            }
+            XCTAssertEqual(agent.id, "lazygit")
+            XCTAssertEqual(event, .running)
+            XCTAssertEqual(sessionId, id)
+        }
+    }
+
+    @MainActor
     func testHookServerParsesShellEnvironmentPayload() throws {
         let id = UUID()
         let data = try JSONSerialization.data(withJSONObject: [

@@ -31,7 +31,6 @@ curl --fail --show-error --location \
     --max-time 600 \
     --retry 5 \
     --retry-delay 5 \
-    --retry-all-errors \
     -o "$ARCHIVE_PATH" \
     "$ARCHIVE_URL"
 
