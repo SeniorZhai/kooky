@@ -571,6 +571,38 @@ final class WorkspaceStoreTests: XCTestCase {
         XCTAssertEqual(session.lastCommandExit, 0)
     }
 
+    func testActivateNextWorkspaceCycles() {
+        let store = makeStore()
+        let ws1 = store.workspaces[0]
+        let ws2 = store.addWorkspace(workingDirectory: projectA)
+        let ws3 = store.addWorkspace(workingDirectory: projectB)
+        
+        store.activateWorkspace(ws1)
+        XCTAssertEqual(store.activeWorkspaceId, ws1.id)
+        
+        store.activateNextWorkspace()
+        XCTAssertEqual(store.activeWorkspaceId, ws2.id)
+        
+        store.activateNextWorkspace()
+        XCTAssertEqual(store.activeWorkspaceId, ws3.id)
+        
+        store.activateNextWorkspace()
+        XCTAssertEqual(store.activeWorkspaceId, ws1.id)
+    }
+
+    func testActivatePreviousWorkspaceCycles() {
+        let store = makeStore()
+        let ws1 = store.workspaces[0]
+        let ws2 = store.addWorkspace(workingDirectory: projectA)
+        
+        store.activateWorkspace(ws1)
+        store.activatePreviousWorkspace()
+        XCTAssertEqual(store.activeWorkspaceId, ws2.id)
+        
+        store.activatePreviousWorkspace()
+        XCTAssertEqual(store.activeWorkspaceId, ws1.id)
+    }
+
     func testTerminalTitleReportUpdatesTabAndWorkspaceName() {
         let store = makeStore()
         let ws = store.addWorkspace(workingDirectory: projectA)
