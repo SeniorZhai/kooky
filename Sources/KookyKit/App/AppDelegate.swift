@@ -8,6 +8,8 @@ import SwiftUI
 private enum MenuTag {
     static let tabRange = 1...9
     static let workspaceRange = 101...109
+    static let nextWorkspace = 201
+    static let previousWorkspace = 202
     static func tab(_ n: Int) -> Int { n }
     static func workspace(_ n: Int) -> Int { 100 + n }
     static func tabIndex(from tag: Int) -> Int { tag - 1 }
@@ -134,6 +136,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
         }
         let viewEntries: [MenuEntry] = [
             selfRow("Toggle Sidebar", #selector(handleToggleSidebar), "s", modifiers: [.command, .control]),
+            selfRow("Toggle Sidebar Visibility", #selector(handleToggleSidebarBinary), "b", modifiers: [.command]),
             .separator,
             selfRow("Increase Font Size", #selector(handleIncreaseFontSize), "="),
             selfRow("Decrease Font Size", #selector(handleDecreaseFontSize), "-"),
@@ -147,6 +150,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
             // counts as a prompt boundary.
             selfRow("Jump to Previous Prompt", #selector(handleJumpToPreviousPrompt), "\u{F700}"),
             selfRow("Jump to Next Prompt", #selector(handleJumpToNextPrompt), "\u{F701}"),
+            .separator,
+            selfRow("Next Workspace", #selector(handleNextWorkspace), "\u{F701}", modifiers: [.option], tag: MenuTag.nextWorkspace),
+            selfRow("Previous Workspace", #selector(handlePreviousWorkspace), "\u{F700}", modifiers: [.option], tag: MenuTag.previousWorkspace),
             .separator,
             selfRow("Split Right", #selector(handleSplitRight), "d"),
             selfRow("Split Down", #selector(handleSplitDown), "d", modifiers: [.command, .shift]),
@@ -364,6 +370,24 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
     @objc private func handleToggleSidebar() {
         withAnimation(Theme.chromeTransition) {
             store.setSidebarMode(store.sidebarMode.next)
+        }
+    }
+
+    @objc private func handleNextWorkspace() {
+        store.activateNextWorkspace()
+    }
+
+    @objc private func handlePreviousWorkspace() {
+        store.activatePreviousWorkspace()
+    }
+
+    @objc private func handleToggleSidebarBinary() {
+        withAnimation(Theme.chromeTransition) {
+            if store.sidebarMode == .hidden {
+                store.setSidebarMode(.full)
+            } else {
+                store.setSidebarMode(.hidden)
+            }
         }
     }
 
