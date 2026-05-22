@@ -136,7 +136,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
         }
         let viewEntries: [MenuEntry] = [
             selfRow("Toggle Sidebar", #selector(handleToggleSidebar), "s", modifiers: [.command, .control]),
-            selfRow("Toggle Sidebar Visibility", #selector(handleToggleSidebarBinary), "b", modifiers: [.command]),
+            selfRow("Toggle Sidebar Visibility", #selector(handleToggleSidebar), "b", modifiers: [.command]),
             .separator,
             selfRow("Increase Font Size", #selector(handleIncreaseFontSize), "="),
             selfRow("Decrease Font Size", #selector(handleDecreaseFontSize), "-"),

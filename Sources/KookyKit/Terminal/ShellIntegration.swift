@@ -167,6 +167,8 @@ enum KookyShellIntegration {
         writeWrapper(name: "copilot", script: bracketWrapperScript(slug: "copilot"))
         writeWrapper(name: "grok", script: bracketWrapperScript(slug: "grok"))
         writeWrapper(name: "agy", script: antigravityWrapperScript)
+        writeWrapper(name: "lazygit", script: bracketWrapperScript(slug: "lazygit"))
+        writeWrapper(name: "lg", script: bracketWrapperScript(slug: "lg"))
 
         let hookCmd = kookyHookBinaryPath
         writeJSON(at: claudeHooksPath, object: claudeHooksObject(hookCmd: hookCmd))

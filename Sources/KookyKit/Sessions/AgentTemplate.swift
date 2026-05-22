@@ -41,6 +41,10 @@ struct AgentTemplate: Identifiable, Hashable {
     /// this agent yet). Claude Code = `--resume`; Grok = `--session`. Drives
     /// `makeSessionConfig(resumeId:)` and `supportsResume`.
     let resumeFlag: String?
+    /// Alternative binary names or shell aliases that should be recognized
+    /// as this agent. Used by `from(hookSlug:)` to map hook pings to the
+    /// correct template.
+    let aliases: [String]
 
     init(
         id: String,
@@ -51,7 +55,8 @@ struct AgentTemplate: Identifiable, Hashable {
         initialCommand: String?,
         baseAgentId: String? = nil,
         promptLaunchFlag: String? = nil,
-        resumeFlag: String? = nil
+        resumeFlag: String? = nil,
+        aliases: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -62,6 +67,7 @@ struct AgentTemplate: Identifiable, Hashable {
         self.baseAgentId = baseAgentId
         self.promptLaunchFlag = promptLaunchFlag
         self.resumeFlag = resumeFlag
+        self.aliases = aliases
     }
 
     var tint: Color? {
@@ -237,7 +243,8 @@ extension AgentTemplate {
         symbol: "point.topleft.down.curvedto.point.bottomright.up",
         iconAsset: "lazygit",
         tintHex: "B95651",
-        initialCommand: "lazygit"
+        initialCommand: "lazygit",
+        aliases: ["lg"]
     )
 
     /// Antigravity CLI — Google's Go-based successor to Gemini CLI; binary
@@ -290,7 +297,7 @@ extension AgentTemplate {
     /// pulls the live `all` (built-in + custom).
     @MainActor
     static func from(hookSlug: String) -> AgentTemplate? {
-        all.first { $0.initialCommand == hookSlug }
+        all.first { $0.initialCommand == hookSlug || $0.aliases.contains(hookSlug) }
     }
 
     /// All non-terminal templates resolved against the user's saved order.
