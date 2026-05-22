@@ -231,6 +231,15 @@ extension AgentTemplate {
         initialCommand: "grok"
     )
 
+    static let lazygit = AgentTemplate(
+        id: "lazygit",
+        title: "Lazygit",
+        symbol: "point.topleft.down.curvedto.point.bottomright.up",
+        iconAsset: "lazygit",
+        tintHex: "B95651",
+        initialCommand: "lazygit"
+    )
+
     /// Antigravity CLI — Google's Go-based successor to Gemini CLI; binary
     /// `agy`. The `.gemini` template stays in `builtin` alongside this one
     /// until 2026-06-18 when free/Pro access to Gemini CLI sunsets;
@@ -263,9 +272,9 @@ extension AgentTemplate {
         promptLaunchFlag: "-i"
     )
 
-    /// The 10 templates shipped with kooky. User-defined custom agents are
+    /// The 11 templates shipped with kooky. User-defined custom agents are
     /// merged on top via `all` at runtime.
-    static let builtin: [AgentTemplate] = [.terminal, .claudeCode, .codex, .gemini, .opencode, .amp, .cursor, .copilot, .grok, .antigravity]
+    static let builtin: [AgentTemplate] = [.terminal, .claudeCode, .codex, .gemini, .opencode, .amp, .cursor, .copilot, .grok, .antigravity, .lazygit]
 
     /// All templates available right now — `builtin` plus the user's custom
     /// agents from Settings → Agents. MainActor-isolated because it
