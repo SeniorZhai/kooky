@@ -639,14 +639,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate 
     }
 
     @objc private func handleNextWorkspace() {
-        store.activateNextWorkspace()
+        activeStore?.activateNextWorkspace()
     }
 
     @objc private func handlePreviousWorkspace() {
-        store.activatePreviousWorkspace()
+        activeStore?.activatePreviousWorkspace()
     }
 
     @objc private func handleToggleSidebarBinary() {
+        guard let store = activeStore else { return }
         withAnimation(Theme.chromeTransition) {
             if store.sidebarMode == .hidden {
                 store.setSidebarMode(.full)
