@@ -41,6 +41,157 @@ enum AgentIcon {
     }
 }
 
+enum AgentStatusDecoration: Equatable {
+    case running
+    case attention
+    case failed
+
+    init?(activity: SessionActivityState?, hasFailure: Bool) {
+        if activity == .attention {
+            self = .attention
+        } else if hasFailure {
+            self = .failed
+        } else if activity == .running {
+            self = .running
+        } else {
+            return nil
+        }
+    }
+
+    init?(_ monitorState: AgentMonitor.State) {
+        switch monitorState {
+        case .attention:
+            self = .attention
+        case .failed:
+            self = .failed
+        case .running:
+            self = .running
+        case .idle:
+            return nil
+        }
+    }
+}
+
+struct AgentStatusIconView: View {
+    let asset: String?
+    let fallbackSymbol: String
+    let size: CGFloat
+    let decoration: AgentStatusDecoration?
+
+    init(
+        asset: String?,
+        fallbackSymbol: String,
+        size: CGFloat,
+        activity: SessionActivityState?,
+        hasFailure: Bool
+    ) {
+        self.asset = asset
+        self.fallbackSymbol = fallbackSymbol
+        self.size = size
+        self.decoration = AgentStatusDecoration(activity: activity, hasFailure: hasFailure)
+    }
+
+    init(
+        asset: String?,
+        fallbackSymbol: String,
+        size: CGFloat,
+        decoration: AgentStatusDecoration?
+    ) {
+        self.asset = asset
+        self.fallbackSymbol = fallbackSymbol
+        self.size = size
+        self.decoration = decoration
+    }
+
+    var body: some View {
+        AgentIconView(asset: asset, fallbackSymbol: fallbackSymbol, size: size)
+            .overlay {
+                if let decoration {
+                    AgentStatusRing(decoration: decoration, size: size)
+                        .id(decoration)
+                }
+            }
+            .frame(width: size, height: size)
+    }
+}
+
+private struct AgentStatusRing: View {
+    let decoration: AgentStatusDecoration
+    let size: CGFloat
+
+    @State private var dashPhase: CGFloat = 0
+    @State private var pulseVisible = false
+
+    var body: some View {
+        switch decoration {
+        case .running:
+            runningRing
+        case .attention, .failed:
+            dashedRing
+        }
+    }
+
+    private var runningRing: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .stroke(
+                Theme.activityRunning,
+                style: StrokeStyle(
+                    lineWidth: lineWidth,
+                    lineCap: .round,
+                    lineJoin: .round,
+                    dash: [runningSegmentLength, runningGapLength],
+                    dashPhase: dashPhase
+                )
+            )
+        .frame(width: ringSize, height: ringSize)
+        .rotationEffect(.degrees(-90))
+        .onAppear {
+            dashPhase = 0
+            withAnimation(.linear(duration: 1.35).repeatForever(autoreverses: false)) {
+                dashPhase = -runningPathLength
+            }
+        }
+    }
+
+    private var dashedRing: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .stroke(
+                dashedColor,
+                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round, dash: [3.5, 3.5])
+            )
+            .frame(width: ringSize, height: ringSize)
+            .opacity(pulseVisible ? 1 : 0)
+            .scaleEffect(pulseVisible ? 1 : 0.98)
+            .onAppear {
+                pulseVisible = false
+                withAnimation(.easeInOut(duration: 1.65).repeatForever(autoreverses: true)) {
+                    pulseVisible = true
+                }
+            }
+    }
+
+    private var dashedColor: Color {
+        switch decoration {
+        case .failed: return Theme.activityFailure
+        case .attention: return Theme.activityAttention
+        case .running: return Theme.activityRunning
+        }
+    }
+
+    private var lineWidth: CGFloat { 2 }
+    private var ringSize: CGFloat { size + 8 }
+    private var cornerRadius: CGFloat { max(6, size * 0.28) }
+    private var runningSegmentLength: CGFloat { ringSize * 0.9 }
+    private var runningPathLength: CGFloat {
+        let straight = 2 * max(0, ringSize + ringSize - 4 * cornerRadius)
+        let arcs = 2 * CGFloat.pi * cornerRadius
+        return straight + arcs
+    }
+    private var runningGapLength: CGFloat {
+        max(runningPathLength - runningSegmentLength, 1)
+    }
+}
+
 struct AgentIconView: View {
     let asset: String?
     let fallbackSymbol: String

@@ -37,12 +37,11 @@ struct SidebarWorkspaceRow: View {
 
     var body: some View {
         let readout = workspace.sidebarReadout
-        let dotColor = Self.activityDotColor(state: readout.state, hasFailure: readout.hasCommandFailure)
         Group {
             if isCompact {
-                compactBody(agents: readout.agents, dotColor: dotColor)
+                compactBody(agents: readout.agents, readout: readout)
             } else {
-                fullBody(agents: readout.agents, dotColor: dotColor)
+                fullBody(agents: readout.agents, readout: readout)
             }
         }
         .background(rowBackground)
@@ -139,9 +138,12 @@ struct SidebarWorkspaceRow: View {
         }
     }
 
-    private func fullBody(agents: [AgentTemplate], dotColor: Color?) -> some View {
+    private func fullBody(
+        agents: [AgentTemplate],
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+    ) -> some View {
         HStack(spacing: Theme.space2) {
-            agentIcons(agents: agents)
+            agentIcons(agents: agents, readout: readout)
                 .padding(.trailing, 3)
             VStack(alignment: .leading, spacing: 2) {
                 Text(workspace.title)
@@ -151,8 +153,6 @@ struct SidebarWorkspaceRow: View {
                 subtitleRow
             }
             Spacer(minLength: 0)
-            // Activity dot lives at the trailing edge — visible at all times
-            // when not idle, eats the close-button slot only on hover.
             HStack(spacing: 2) {
                 if let disclosure {
                     HoverableIconButton(
@@ -178,10 +178,6 @@ struct SidebarWorkspaceRow: View {
                     .allowsHitTesting(isHovered)
                 }
                 ZStack {
-                    if let dotColor {
-                        Circle().fill(dotColor).frame(width: 6, height: 6)
-                            .opacity(isHovered ? 0 : 1)
-                    }
                     HoverableIconButton(
                         systemName: "xmark",
                         fontSize: 9,
@@ -200,18 +196,11 @@ struct SidebarWorkspaceRow: View {
         .padding(.vertical, 11)
     }
 
-    private func compactBody(agents: [AgentTemplate], dotColor: Color?) -> some View {
-        // Icon-only row — activity dot floats over the icon as a small badge
-        // since there's no trailing slot in the narrowed column.
-        ZStack(alignment: .topTrailing) {
-            agentIcons(agents: agents)
-            if let dotColor {
-                Circle()
-                    .fill(dotColor)
-                    .frame(width: 6, height: 6)
-                    .offset(x: 3, y: -3)
-            }
-        }
+    private func compactBody(
+        agents: [AgentTemplate],
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+    ) -> some View {
+        agentIcons(agents: agents, readout: readout)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 9)
     }
@@ -267,14 +256,23 @@ struct SidebarWorkspaceRow: View {
     }
 
     @ViewBuilder
-    private func agentIcons(agents: [AgentTemplate]) -> some View {
+    private func agentIcons(
+        agents: [AgentTemplate],
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+    ) -> some View {
         // Single leading mark: first non-terminal agent's brand icon, or the
         // Terminal SF Symbol when the workspace only runs plain shells.
         // Multi-agent workspaces get a `+N` badge showing the additional
         // distinct agents — first agent stays the dominant mark.
         if let agent = agents.first {
             ZStack(alignment: .bottomTrailing) {
-                AgentIconView(asset: agent.iconAsset, fallbackSymbol: agent.symbol, size: 20)
+                AgentStatusIconView(
+                    asset: agent.iconAsset,
+                    fallbackSymbol: agent.symbol,
+                    size: 20,
+                    activity: readout.state,
+                    hasFailure: readout.hasCommandFailure
+                )
                 if agents.count > 1 {
                     Text("+\(agents.count - 1)")
                         .font(Theme.mono(9))
@@ -292,16 +290,6 @@ struct SidebarWorkspaceRow: View {
                 .foregroundStyle(Theme.chromeMuted)
                 .frame(width: 20, height: 20)
         }
-    }
-
-    /// Precedence: attention (agent literally waits on you) > failure
-    /// (last shell command non-zero, look when free) > running (agent in
-    /// flight, FYI) > idle (quiet).
-    private static func activityDotColor(state: SessionActivityState, hasFailure: Bool) -> Color? {
-        if state == .attention { return Theme.activityAttention }
-        if hasFailure { return Theme.activityFailure }
-        if state == .running { return Theme.activityRunning }
-        return nil
     }
 
     /// Row body's background. Compact-mode worktree rows carry a 1.5pt

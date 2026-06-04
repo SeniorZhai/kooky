@@ -193,7 +193,12 @@ private struct AgentOverviewRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            AgentIconView(asset: entry.agent.iconAsset, fallbackSymbol: entry.agent.symbol, size: 16)
+            AgentStatusIconView(
+                asset: entry.agent.iconAsset,
+                fallbackSymbol: entry.agent.symbol,
+                size: 16,
+                decoration: AgentStatusDecoration(entry.state)
+            )
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.agent.title)
                     .font(Theme.mono(12, weight: .medium))
@@ -223,14 +228,13 @@ private struct AgentOverviewCompactRow: View {
     @State private var isHovered = false
 
     var body: some View {
-        AgentIconView(asset: entry.agent.iconAsset, fallbackSymbol: entry.agent.symbol, size: 17)
+        AgentStatusIconView(
+            asset: entry.agent.iconAsset,
+            fallbackSymbol: entry.agent.symbol,
+            size: 17,
+            decoration: AgentStatusDecoration(entry.state)
+        )
             .frame(width: 32, height: 32)
-            .overlay(alignment: .bottomTrailing) {
-                Circle()
-                    .fill(agentAccent(entry.state))
-                    .frame(width: 7, height: 7)
-                    .overlay(Circle().stroke(Theme.chromeBackground, lineWidth: 1.5))
-            }
             .background(isHovered ? Theme.chromeHover : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .contentShape(Rectangle())
