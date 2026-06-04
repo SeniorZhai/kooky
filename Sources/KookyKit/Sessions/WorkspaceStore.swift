@@ -537,6 +537,22 @@ final class WorkspaceStore {
         scheduleSave()
     }
 
+    func activateNextWorkspace() {
+        cycleWorkspace(direction: 1)
+    }
+
+    func activatePreviousWorkspace() {
+        cycleWorkspace(direction: -1)
+    }
+
+    private func cycleWorkspace(direction: Int) {
+        guard !workspaces.isEmpty else { return }
+        let currentId = activeWorkspaceId ?? workspaces.first?.id
+        let idx = workspaces.firstIndex(where: { $0.id == currentId }) ?? 0
+        let nextIdx = workspaces.cyclicIndex(from: idx, step: direction)
+        activateWorkspace(workspaces[nextIdx])
+    }
+
     @discardableResult
     func duplicateWorkspace(_ workspace: Workspace) -> Workspace {
         addWorkspace(workingDirectory: workspace.workingDirectory)

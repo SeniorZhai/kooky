@@ -62,6 +62,10 @@ struct AgentTemplate: Identifiable, Hashable {
     /// `reopenLastClosedTab`). `~/` is expanded; a missing path falls back
     /// to `$HOME` via `resolvedSpawnCwd`.
     let extraCwd: String?
+    /// Alternative binary names or shell aliases that should be recognized
+    /// as this agent. Used by `from(hookSlug:)` to map hook pings to the
+    /// correct template.
+    let aliases: [String]
 
     /// True when this template launches a plain shell instead of an agent
     /// binary. Covers the default `.terminal` and every materialised
@@ -83,7 +87,8 @@ struct AgentTemplate: Identifiable, Hashable {
         resumeFlag: String? = nil,
         reportsToolCalls: Bool = false,
         extraEnv: [String: String] = [:],
-        extraCwd: String? = nil
+        extraCwd: String? = nil,
+        aliases: [String] = []
     ) {
         self.id = id
         self.title = title
@@ -97,6 +102,7 @@ struct AgentTemplate: Identifiable, Hashable {
         self.reportsToolCalls = reportsToolCalls
         self.extraEnv = extraEnv
         self.extraCwd = extraCwd
+        self.aliases = aliases
     }
 
     var tint: Color? {
@@ -311,6 +317,16 @@ extension AgentTemplate {
         initialCommand: "grok"
     )
 
+    static let lazygit = AgentTemplate(
+        id: "lazygit",
+        title: "Lazygit",
+        symbol: "point.topleft.down.curvedto.point.bottomright.up",
+        iconAsset: "lazygit",
+        tintHex: "B95651",
+        initialCommand: "lazygit",
+        aliases: ["lg"]
+    )
+
     /// Antigravity CLI — Google's Go-based successor to Gemini CLI; binary
     /// `agy`. The `.gemini` template stays in `builtin` alongside this one
     /// until 2026-06-18 when free/Pro access to Gemini CLI sunsets;
@@ -430,9 +446,9 @@ extension AgentTemplate {
         initialCommand: "kiro-cli"
     )
 
-    /// The 13 templates shipped with kooky. User-defined custom agents are
+    /// The 14 templates shipped with kooky. User-defined custom agents are
     /// merged on top via `all` at runtime.
-    static let builtin: [AgentTemplate] = [.terminal, .claudeCode, .codex, .gemini, .opencode, .amp, .cursor, .copilot, .grok, .antigravity, .kimi, .pi, .kiro]
+    static let builtin: [AgentTemplate] = [.terminal, .claudeCode, .codex, .gemini, .opencode, .amp, .cursor, .copilot, .grok, .lazygit, .antigravity, .kimi, .pi, .kiro]
 
     /// All templates available right now — `builtin` plus the user's custom
     /// agents from Settings → Agents. MainActor-isolated because it
@@ -448,7 +464,7 @@ extension AgentTemplate {
     /// pulls the live `all` (built-in + custom).
     @MainActor
     static func from(hookSlug: String) -> AgentTemplate? {
-        all.first { $0.initialCommand == hookSlug }
+        all.first { $0.initialCommand == hookSlug || $0.aliases.contains(hookSlug) }
     }
 
     /// All non-terminal templates resolved against the user's saved order.

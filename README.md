@@ -48,6 +48,23 @@ A minimal modern terminal built for AI coding. Sidebar workspaces; horizontal / 
 
 **libghostty-powered.** GPU-accelerated cell rendering, same engine as ghostty. Fast.
 
+## Shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `⌘T` | New Tab |
+| `⌘N` | New Workspace |
+| `⌘W` | Close Tab |
+| `⌘⇧T` | Reopen Closed Tab |
+| `⌘⇧W` | Close Workspace |
+| `⌘⌃S` | Toggle Sidebar (three-state) |
+| `⌘B` | Toggle Sidebar Visibility |
+| `⌘1`–`9` | Switch Tab |
+| `⌘⌥1`–`9` | Switch Workspace |
+| `⌘=` / `⌘-` | Increase / Decrease Font Size |
+| `⌘K` | Clear Pane |
+| `⌘F` | Find in Pane |
+
 ## Install
 
 Download the latest `.dmg` from [Releases](https://github.com/iAmCorey/kooky/releases). Open it and drag `Kooky.app` to `Applications`.

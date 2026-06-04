@@ -26,6 +26,17 @@ final class HookServerTests: XCTestCase {
         XCTAssertEqual(sessionId, Self.surfaceUUID)
     }
 
+    func testParseAttentionBangAliasAsWaitingOnInput() throws {
+        for rawEvent in ["!", "！"] {
+            let json = #"{"surface":"\#(Self.surfaceUUID.uuidString)","agent":"claude","event":"\#(rawEvent)"}"#
+            let message = HookServer.parseMessage(data(json))
+            guard case let .agent(_, event, _) = message else {
+                return XCTFail("Expected .agent for \(rawEvent), got \(String(describing: message))")
+            }
+            XCTAssertEqual(event, .attention)
+        }
+    }
+
     func testParseEnvPayload() throws {
         let json = #"""
         {"surface":"\#(Self.surfaceUUID.uuidString)","kind":"env","VIRTUAL_ENV":"/v","CONDA_DEFAULT_ENV":"","NVM_BIN":"","NVM_DIR":"","KOOKY_NODE_VERSION":"","https_proxy":"","http_proxy":"","all_proxy":""}

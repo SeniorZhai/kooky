@@ -338,6 +338,8 @@ enum KookyShellIntegration {
         writeWrapper(name: "kimi", script: bracketWrapperScript(slug: "kimi"))
         writeWrapper(name: "pi", script: bracketWrapperScript(slug: "pi"))
         writeWrapper(name: "kiro-cli", script: bracketWrapperScript(slug: "kiro-cli"))
+        writeWrapper(name: "lazygit", script: bracketWrapperScript(slug: "lazygit"))
+        writeWrapper(name: "lg", script: bracketWrapperScript(slug: "lg"))
         refreshSshRemoteAgentDetection(enabled: sshRemoteAgentDetection)
 
         let hookCmd = kookyHookBinaryPath

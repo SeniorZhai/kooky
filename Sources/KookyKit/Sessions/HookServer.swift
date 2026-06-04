@@ -222,8 +222,17 @@ final class HookServer {
             let agentSlug = dict["agent"] as? String,
             let eventName = dict["event"] as? String,
             let agent = AgentTemplate.from(hookSlug: agentSlug),
-            let event = HookEvent(rawValue: eventName)
+            let event = HookEvent.wireValue(eventName)
         else { return nil }
         return .agent(agent: agent, event: event, sessionId: id)
+    }
+}
+
+private extension HookEvent {
+    static func wireValue(_ raw: String) -> HookEvent? {
+        switch raw {
+        case "!", "！": return .attention
+        default: return HookEvent(rawValue: raw)
+        }
     }
 }
