@@ -88,6 +88,15 @@ final class ShellIntegrationTests: XCTestCase {
         XCTAssertTrue(script.contains("exec \"$real\" \"$@\""), "must passthrough when KOOKY_SURFACE_ID is unset")
     }
 
+    func testLgWrapperFallsBackToLazygitBinary() {
+        let script = KookyShellIntegration.lazygitAliasWrapperScript
+
+        XCTAssertTrue(script.contains(#"for candidate in "lg" "lazygit"; do"#))
+        XCTAssertTrue(script.contains(#"if [[ -x "$dir/$candidate" ]]; then"#))
+        XCTAssertTrue(script.contains("\"$KOOKY_HOOK_BIN\" lg running"))
+        XCTAssertTrue(script.contains("\"$KOOKY_HOOK_BIN\" lg ended"))
+    }
+
     @MainActor
     func testAgentStatusMarkerParsesKnownAgentTitle() throws {
         let parsed = try XCTUnwrap(AgentStatusMarker.parseTitle("kooky-agent:codex:attention"))

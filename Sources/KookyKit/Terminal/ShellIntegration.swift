@@ -339,7 +339,7 @@ enum KookyShellIntegration {
         writeWrapper(name: "pi", script: bracketWrapperScript(slug: "pi"))
         writeWrapper(name: "kiro-cli", script: bracketWrapperScript(slug: "kiro-cli"))
         writeWrapper(name: "lazygit", script: bracketWrapperScript(slug: "lazygit"))
-        writeWrapper(name: "lg", script: bracketWrapperScript(slug: "lg"))
+        writeWrapper(name: "lg", script: lazygitAliasWrapperScript)
         refreshSshRemoteAgentDetection(enabled: sshRemoteAgentDetection)
 
         let hookCmd = kookyHookBinaryPath
@@ -728,18 +728,21 @@ enum KookyShellIntegration {
 
     /// Common bash header for every wrapper: locate the real binary on
     /// `$PATH` skipping our own dir, abort if missing.
-    private static func wrapperPreamble(binary: String) -> String {
-        """
+    private static func wrapperPreamble(binary: String, fallbackBinaries: [String] = []) -> String {
+        let candidates = ([binary] + fallbackBinaries).map { "\"\($0)\"" }.joined(separator: " ")
+        return """
         #!/usr/bin/env bash
         self_dir="$(cd "$(dirname "$0")" && pwd)"
         real=""
         IFS=:
         for dir in $PATH; do
             [[ "$dir" == "$self_dir" ]] && continue
-            if [[ -x "$dir/\(binary)" ]]; then
-                real="$dir/\(binary)"
-                break
-            fi
+            for candidate in \(candidates); do
+                if [[ -x "$dir/$candidate" ]]; then
+                    real="$dir/$candidate"
+                    break 2
+                fi
+            done
         done
         unset IFS
 
@@ -1041,6 +1044,12 @@ enum KookyShellIntegration {
         \(bracketBody(slug: slug))
         """
     }
+
+    static let lazygitAliasWrapperScript = """
+    \(wrapperPreamble(binary: "lg", fallbackBinaries: ["lazygit"]))
+
+    \(bracketBody(slug: "lg"))
+    """
 
     /// The `running` → exec → `ended` body shared by `bracketWrapperScript`
     /// and `antigravityWrapperScript`. Outside a kooky session (and without
