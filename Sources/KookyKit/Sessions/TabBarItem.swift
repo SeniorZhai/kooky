@@ -20,12 +20,13 @@ struct TabBarItem: View {
 
     var body: some View {
         HStack(spacing: 7) {
+            commandStatusDot
             AgentStatusIconView(
                 asset: tab.displayAgent.iconAsset,
                 fallbackSymbol: tab.displayAgent.symbol,
                 size: 15,
                 activity: tab.activityState,
-                hasFailure: tab.lastCommandExit.map { $0 != 0 } ?? false
+                isShowingProgress: tab.isShowingToolCallProgress
             )
             Text(tab.title)
                 .font(Theme.display(12, weight: .regular))
@@ -129,5 +130,31 @@ struct TabBarItem: View {
         if isActive { return Theme.chromeActive }
         if isHovered { return Theme.chromeHover }
         return .clear
+    }
+
+    /// Shows only on non-zero exit. Successful runs intentionally leave the
+    /// row clean; waiting-on-user and running progress are handled by the icon
+    /// decoration.
+    @ViewBuilder
+    private var commandStatusDot: some View {
+        if let exit = tab.lastCommandExit, exit != 0 {
+            Circle()
+                .fill(Theme.activityFailure)
+                .frame(width: 5, height: 5)
+                .help(Self.statusTooltip(exit: exit, duration: tab.lastCommandDuration))
+        }
+    }
+
+    private static func statusTooltip(exit: Int, duration: TimeInterval?) -> String {
+        guard let duration else { return "exit \(exit)" }
+        return "exit \(exit) · \(formatDuration(duration))"
+    }
+
+    private static func formatDuration(_ seconds: TimeInterval) -> String {
+        if seconds < 1 { return "\(Int((seconds * 1000).rounded()))ms" }
+        if seconds < 60 { return String(format: "%.1fs", seconds) }
+        let minutes = Int(seconds / 60)
+        let rem = Int(seconds.truncatingRemainder(dividingBy: 60).rounded())
+        return "\(minutes)m \(rem)s"
     }
 }

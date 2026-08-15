@@ -2,27 +2,26 @@ import XCTest
 @testable import KookyKit
 
 final class AgentStatusIconViewTests: XCTestCase {
-    func testDecorationMapsRunningToRunningRing() {
-        XCTAssertEqual(AgentStatusDecoration(activity: .running, hasFailure: false), .running)
+    func testDecorationDoesNotSpinForActivityRunningAlone() {
+        XCTAssertNil(AgentStatusDecoration(activity: .running, isShowingProgress: false))
+    }
+
+    func testDecorationSpinsForVisibleProgressEvenWhenActivityIsIdle() {
+        XCTAssertEqual(AgentStatusDecoration(activity: .running, isShowingProgress: true), .running)
+        XCTAssertEqual(AgentStatusDecoration(activity: .idle, isShowingProgress: true), .running)
     }
 
     func testDecorationMapsAttentionBeforeFailure() {
-        XCTAssertEqual(AgentStatusDecoration(activity: .attention, hasFailure: true), .attention)
+        XCTAssertEqual(AgentStatusDecoration(activity: .attention, isShowingProgress: true), .attention)
     }
 
-    func testDecorationMapsFailureToFailedRing() {
-        XCTAssertEqual(AgentStatusDecoration(activity: .idle, hasFailure: true), .failed)
+    func testDecorationDoesNotUseDashedRingForFailure() {
+        XCTAssertNil(AgentStatusDecoration(activity: .idle, isShowingProgress: false))
     }
 
     func testDecorationMapsIdleAndNilToNoRing() {
-        XCTAssertNil(AgentStatusDecoration(activity: .idle, hasFailure: false))
-        XCTAssertNil(AgentStatusDecoration(activity: nil, hasFailure: false))
+        XCTAssertNil(AgentStatusDecoration(activity: .idle, isShowingProgress: false))
+        XCTAssertNil(AgentStatusDecoration(activity: nil, isShowingProgress: false))
     }
 
-    func testDecorationMapsAgentMonitorStates() {
-        XCTAssertEqual(AgentStatusDecoration(AgentMonitor.State.running), .running)
-        XCTAssertEqual(AgentStatusDecoration(AgentMonitor.State.attention), .attention)
-        XCTAssertEqual(AgentStatusDecoration(AgentMonitor.State.failed), .failed)
-        XCTAssertNil(AgentStatusDecoration(AgentMonitor.State.idle))
-    }
 }

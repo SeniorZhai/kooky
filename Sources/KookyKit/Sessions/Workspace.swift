@@ -88,11 +88,12 @@ final class Workspace: Identifiable {
     /// to completion (no short-circuit) so each field reflects the whole
     /// tree — short-circuiting on attention previously left `hasFailure`
     /// false when a sibling pane held a non-zero exit.
-    var sidebarReadout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool) {
+    var sidebarReadout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool, isShowingProgress: Bool) {
         var seen: Set<String> = []
         var agents: [AgentTemplate] = []
         var state: SessionActivityState = .idle
         var hasFailure = false
+        var isShowingProgress = false
         walk(root) { pane in
             for tab in pane.tabs {
                 let agent = tab.displayAgent
@@ -101,6 +102,7 @@ final class Workspace: Identifiable {
                     agents.append(agent)
                 }
                 if let exit = tab.lastCommandExit, exit != 0 { hasFailure = true }
+                if tab.isShowingToolCallProgress { isShowingProgress = true }
                 switch tab.activityState {
                 case .attention: state = .attention
                 case .running where state != .attention: state = .running
@@ -108,7 +110,7 @@ final class Workspace: Identifiable {
                 }
             }
         } shouldStop: { false }
-        return (agents, state, hasFailure)
+        return (agents, state, hasFailure, isShowingProgress)
     }
 
     var distinctAgents: [AgentTemplate] { sidebarReadout.agents }

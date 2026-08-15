@@ -130,6 +130,13 @@ final class Session: Identifiable {
     /// design doc calls out.
     static let toolCallOrphanThreshold: TimeInterval = 60
 
+    /// The status-bar tool pill shows only the latest event; it renders `...`
+    /// for `.running`. Agent icon progress follows that same visible signal
+    /// instead of the coarse lifecycle `.running` state.
+    var isShowingToolCallProgress: Bool {
+        toolCallEvents.last?.state == .running
+    }
+
     /// Background timer that periodically sweeps `.running` events for
     /// orphan status. Started lazily on first `recordToolCallStart`; ends
     /// itself when the sweep finds no `.running` events left. `[weak self]`

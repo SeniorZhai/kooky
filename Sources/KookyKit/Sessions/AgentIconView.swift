@@ -44,29 +44,13 @@ enum AgentIcon {
 enum AgentStatusDecoration: Equatable {
     case running
     case attention
-    case failed
 
-    init?(activity: SessionActivityState?, hasFailure: Bool) {
+    init?(activity: SessionActivityState?, isShowingProgress: Bool) {
         if activity == .attention {
             self = .attention
-        } else if hasFailure {
-            self = .failed
-        } else if activity == .running {
+        } else if isShowingProgress {
             self = .running
         } else {
-            return nil
-        }
-    }
-
-    init?(_ monitorState: AgentMonitor.State) {
-        switch monitorState {
-        case .attention:
-            self = .attention
-        case .failed:
-            self = .failed
-        case .running:
-            self = .running
-        case .idle:
             return nil
         }
     }
@@ -83,12 +67,12 @@ struct AgentStatusIconView: View {
         fallbackSymbol: String,
         size: CGFloat,
         activity: SessionActivityState?,
-        hasFailure: Bool
+        isShowingProgress: Bool
     ) {
         self.asset = asset
         self.fallbackSymbol = fallbackSymbol
         self.size = size
-        self.decoration = AgentStatusDecoration(activity: activity, hasFailure: hasFailure)
+        self.decoration = AgentStatusDecoration(activity: activity, isShowingProgress: isShowingProgress)
     }
 
     init(
@@ -126,7 +110,7 @@ private struct AgentStatusRing: View {
         switch decoration {
         case .running:
             runningRing
-        case .attention, .failed:
+        case .attention:
             dashedRing
         }
     }
@@ -171,11 +155,7 @@ private struct AgentStatusRing: View {
     }
 
     private var dashedColor: Color {
-        switch decoration {
-        case .failed: return Theme.activityFailure
-        case .attention: return Theme.activityAttention
-        case .running: return Theme.activityRunning
-        }
+        Theme.activityAttention
     }
 
     private var lineWidth: CGFloat { 2 }

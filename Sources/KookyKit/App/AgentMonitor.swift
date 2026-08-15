@@ -59,6 +59,7 @@ final class AgentMonitor {
         let id: UUID            // sessionId
         let agent: AgentTemplate
         let state: State
+        let decoration: AgentStatusDecoration?
         let tabTitle: String
     }
 
@@ -77,6 +78,10 @@ final class AgentMonitor {
                             id: session.id,
                             agent: agent,
                             state: Self.state(of: session),
+                            decoration: AgentStatusDecoration(
+                                activity: session.activityState,
+                                isShowingProgress: session.isShowingToolCallProgress
+                            ),
                             tabTitle: session.title
                         )
                     }
@@ -197,7 +202,7 @@ private struct AgentOverviewRow: View {
                 asset: entry.agent.iconAsset,
                 fallbackSymbol: entry.agent.symbol,
                 size: 16,
-                decoration: AgentStatusDecoration(entry.state)
+                decoration: entry.decoration
             )
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.agent.title)
@@ -232,9 +237,15 @@ private struct AgentOverviewCompactRow: View {
             asset: entry.agent.iconAsset,
             fallbackSymbol: entry.agent.symbol,
             size: 17,
-            decoration: AgentStatusDecoration(entry.state)
+            decoration: entry.decoration
         )
             .frame(width: 32, height: 32)
+            .overlay(alignment: .bottomTrailing) {
+                Circle()
+                    .fill(agentAccent(entry.state))
+                    .frame(width: 7, height: 7)
+                    .overlay(Circle().stroke(Theme.chromeBackground, lineWidth: 1.5))
+            }
             .background(isHovered ? Theme.chromeHover : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .contentShape(Rectangle())

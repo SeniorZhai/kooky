@@ -840,6 +840,22 @@ final class WorkspaceStoreTests: XCTestCase {
         XCTAssertTrue(ws.hasCommandFailure)
     }
 
+    func testSidebarReadoutProgressTracksRunningToolCallsOnly() {
+        let store = makeStore()
+        let ws = store.addWorkspace(workingDirectory: projectA)
+        let session = firstPane(ws).tabs[0]
+        session.agent = .claudeCode
+        session.activityState = .running
+
+        XCTAssertFalse(ws.sidebarReadout.isShowingProgress)
+
+        session.recordToolCallStart(toolName: "Bash", identifier: "git status")
+        XCTAssertTrue(ws.sidebarReadout.isShowingProgress)
+
+        session.recordToolCallEnd(toolName: "Bash", identifier: "git status", success: true)
+        XCTAssertFalse(ws.sidebarReadout.isShowingProgress)
+    }
+
     func testPresetTabsAreTreatedAsShellsInSidebarReadout() {
         // Regression: when `Workspace.sidebarReadout` filtered with
         // `id != AgentTemplate.terminal.id`, preset tabs (id `preset-N`)

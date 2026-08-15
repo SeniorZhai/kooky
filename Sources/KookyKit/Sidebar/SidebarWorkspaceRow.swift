@@ -140,7 +140,7 @@ struct SidebarWorkspaceRow: View {
 
     private func fullBody(
         agents: [AgentTemplate],
-        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool, isShowingProgress: Bool)
     ) -> some View {
         HStack(spacing: Theme.space2) {
             agentIcons(agents: agents, readout: readout)
@@ -178,6 +178,8 @@ struct SidebarWorkspaceRow: View {
                     .allowsHitTesting(isHovered)
                 }
                 ZStack {
+                    activityDot(readout: readout)
+                        .opacity(isHovered ? 0 : 1)
                     HoverableIconButton(
                         systemName: "xmark",
                         fontSize: 9,
@@ -198,11 +200,15 @@ struct SidebarWorkspaceRow: View {
 
     private func compactBody(
         agents: [AgentTemplate],
-        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool, isShowingProgress: Bool)
     ) -> some View {
-        agentIcons(agents: agents, readout: readout)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 9)
+        ZStack(alignment: .topTrailing) {
+            agentIcons(agents: agents, readout: readout)
+            activityDot(readout: readout)
+                .offset(x: 3, y: -3)
+        }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 9)
     }
 
     /// Subtitle below the workspace title. Source workspaces show their
@@ -258,7 +264,7 @@ struct SidebarWorkspaceRow: View {
     @ViewBuilder
     private func agentIcons(
         agents: [AgentTemplate],
-        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool)
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool, isShowingProgress: Bool)
     ) -> some View {
         // Single leading mark: first non-terminal agent's brand icon, or the
         // Terminal SF Symbol when the workspace only runs plain shells.
@@ -271,7 +277,7 @@ struct SidebarWorkspaceRow: View {
                     fallbackSymbol: agent.symbol,
                     size: 20,
                     activity: readout.state,
-                    hasFailure: readout.hasCommandFailure
+                    isShowingProgress: readout.isShowingProgress
                 )
                 if agents.count > 1 {
                     Text("+\(agents.count - 1)")
@@ -290,6 +296,26 @@ struct SidebarWorkspaceRow: View {
                 .foregroundStyle(Theme.chromeMuted)
                 .frame(width: 20, height: 20)
         }
+    }
+
+    @ViewBuilder
+    private func activityDot(
+        readout: (agents: [AgentTemplate], state: SessionActivityState, hasCommandFailure: Bool, isShowingProgress: Bool)
+    ) -> some View {
+        if let color = Self.activityDotColor(state: readout.state, hasFailure: readout.hasCommandFailure) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+        }
+    }
+
+    /// Precedence: attention (waiting on you) > failure (last command
+    /// non-zero) > running (agent alive) > idle.
+    private static func activityDotColor(state: SessionActivityState, hasFailure: Bool) -> Color? {
+        if state == .attention { return Theme.activityAttention }
+        if hasFailure { return Theme.activityFailure }
+        if state == .running { return Theme.activityRunning }
+        return nil
     }
 
     /// Row body's background. Compact-mode worktree rows carry a 1.5pt
